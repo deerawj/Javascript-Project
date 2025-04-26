@@ -135,29 +135,36 @@ function updateValues(balanceEl, incomeEl, expenseEl) {
   const amounts = transactions.map((transaction) => transaction.amount);
 
   const total = amounts.reduce((acc, amount) => {
-    return (acc = amount);
+    // Corrected the reduce logic for total balance
+    return acc + amount;
   }, 0);
 
   const income = amounts
     .filter((amount) => amount > 0)
     .reduce((acc, amount) => acc + amount, 0);
 
+  // Corrected the reduce logic for expense (sum of negative amounts)
   const expense = amounts
     .filter((amount) => amount < 0)
-    .reduce((acc, amount) => acc - amount, 0);
+    .reduce((acc, amount) => acc + amount, 0); // Keep it negative
 
-  balanceEl.textContent = `Rs ${total}`;
-  incomeEl.textContent = `+Rs ${income}`;
-  expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
+  // Apply .toFixed(2) for consistent formatting
+  balanceEl.textContent = `Rs ${total.toFixed(2)}`;
+  incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
+  // Use Math.abs() here for display, but keep the original expense value negative
+  expenseEl.textContent = `-Rs ${Math.abs(expense).toFixed(2)}`;
 }
 
 // Add transactions to DOM
 function addTransactionDOM(transaction, transactionListEl) {
-  const sign = "-";
+  // Determine sign based on amount
+  const sign = transaction.amount < 0 ? "-" : "+";
+  // Determine class based on amount
+  const itemClass = transaction.amount < 0 ? "minus" : "plus";
 
   const item = document.createElement("li");
-
-  item.className = transaction.category === "income" ? "expense" : "income";
+  // Assign the correct class (plus or minus)
+  item.className = itemClass;
 
   const detailsDiv = document.createElement("div");
   detailsDiv.className = "details";
@@ -168,18 +175,20 @@ function addTransactionDOM(transaction, transactionListEl) {
 
   const catSpan = document.createElement("span");
   catSpan.className = "category";
-  catSpan.textContent = transaction.category;
+  catSpan.textContent = transaction.category; // Keep category display
 
   const dateSpan = document.createElement("span");
   dateSpan.className = "date";
-  dateSpan.textContent = transaction.date;
+  dateSpan.textContent = transaction.date; // Keep date display
 
   detailsDiv.appendChild(descSpan);
   detailsDiv.appendChild(catSpan);
   detailsDiv.appendChild(dateSpan);
 
   const amountSpan = document.createElement("span");
-  amountSpan.className = "amount";
+  // Use the determined class for amount styling as well
+  amountSpan.className = `amount ${itemClass}`;
+  // Use the correct sign and absolute value
   amountSpan.textContent = `${sign}Rs ${Math.abs(transaction.amount).toFixed(
     2
   )}`;
@@ -187,16 +196,22 @@ function addTransactionDOM(transaction, transactionListEl) {
   let deleteBtn = document.createElement("button");
   deleteBtn.className = "delete-btn";
   deleteBtn.textContent = "×";
+  // Add onclick handler to call removeTransaction with the correct id
+  deleteBtn.onclick = () => removeTransaction(transaction.id);
+
 
   item.appendChild(detailsDiv);
   item.appendChild(amountSpan);
   item.appendChild(deleteBtn);
 
-  // Don't change the following line
-  transactionListEl.insertAdjacentHTML("beforeend", item.outerHTML);
+  // Use appendChild instead of insertAdjacentHTML to attach the fully constructed item
+  // with its event listener
+  transactionListEl.appendChild(item);
 
-  // Don't change the following line
-  deleteBtn = transactionListEl.lastElementChild.querySelector(".delete-btn");
+  // The following lines are no longer needed as the button and its listener
+  // are added directly above.
+  // transactionListEl.insertAdjacentHTML("beforeend", item.outerHTML);
+  // deleteBtn = transactionListEl.lastElementChild.querySelector(".delete-btn");
 }
 
 function createChart(chartContainer) {

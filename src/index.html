@@ -141,8 +141,8 @@
         <div class="section-container">
           <div class="filters-tabs">
             <div class="tabs">
-              <button class="tab-btn active"
-                data-tab="transactions">Transactions</button>
+              <button class="tab-btn" data-tab="transactions">Transactions</button>
+              <button class="tab-btn" data-tab="goals">Goals</button>
             </div>
 
             <div class="tab-content active" id="transactions-tab">
@@ -150,12 +150,10 @@
               <ul id="transaction-list" class="list">
               </ul>
             </div>
-
-            <div class="tab-content" id="goals-tab">
+            <div class="tab-content" id="goals" hidden>
               <h3>Savings Goals</h3>
-              <div class="goals-list" id="goals-list">
-              </div>
-              <div class="add-goal-form">
+              <div id="goals-list"></div>
+              <form id="goal-form">
                 <div class="form-row">
                   <div class="form-control">
                     <label for="goal-name">Goal Name</label>
@@ -179,13 +177,16 @@
                   </div>
                 </div>
                 <button id="add-goal-btn" class="btn">Add Goal</button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- Scripts: load main + goals + report modules -->
+    <script src="script.js"></script>
+    <script src="utilities/setGoalsScript.js"></script>
+    <script type="module" src="utilities/generateReport.js"></script>
   </body>
 </html>

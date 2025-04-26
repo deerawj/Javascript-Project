@@ -438,36 +438,21 @@ function addNewCategory() {
   newCategoryInput.value = "";
 }
 
-// Delete category
-function deleteCategory(categoryName) {
-  if (categories.length <= 1) {
-    alert("You must have at least one category");
-    return;
-  }
-
-  if (categoryName == "Other") {
-    alert("You can not delete Other category");
-    return;
-  }
-
-  if (
-    confirm(`Are you sure you want to delete the "${categoryName}" category?`)
-  ) {
-    // Remove category from array
-    categories = categories.filter((cat) => cat !== categoryName);
-
-    // Update transactions with this category to "Other" or first available category
-    const defaultCategory = "Other";
-    const transactions = getTransactionsFromStorage();
-
-    transactions.forEach((transaction) => {
-      if (transaction.category === categoryName) {
-        transaction.category = defaultCategory;
-      }
-    });
-
-    updateLocalStorage();
-  }
+// Remove a category and reassign its transactions to “Other”
+function deleteCategory(categoryToDelete) {
+  // 1. Remove from category list
+  categories = categories.filter(c => c !== categoryToDelete);
+  // 2. Reassign any transactions still bearing that category
+  transactions.forEach(tx => {
+    if (tx.category === categoryToDelete) {
+      tx.category = "Other";
+    }
+  });
+  // 3. Persist changes
+  localStorage.setItem("categories", JSON.stringify(categories));
+  updateLocalStorage();                // update transactions storage
+  updateCategoryDropdowns([document.getElementById("category")]);
+  init();                              // re-render
 }
 
 // Save categories to localStorage and update UI
@@ -478,28 +463,16 @@ function saveCategoriesAndUpdate() {
   renderCategoryList();
 }
 
-// Update all category dropdowns
-function updateCategoryDropdowns(categoryDropdowns) {
-  categoryDropdowns.forEach((dropdown) => {
-    if (!dropdown) return;
-
-    const currentValue = dropdown.value;
-    dropdown.innerHTML = "";
-
-    // Add all categories
-    categories.forEach((category) => {
-      dropdown.insertAdjacentHTML(
-        "beforeend",
-        `<option value="${category.toLowerCase()}">${category}</option>`
-      );
+// Rebuild all <select> dropdowns from raw category names
+function updateCategoryDropdowns(dropdowns) {
+  dropdowns.forEach(dd => {
+    dd.innerHTML = "";
+    categories.forEach(cat => {
+      const option = document.createElement("option");
+      option.value = cat;       // no toLowerCase, no extra formatting
+      option.textContent = cat;
+      dd.appendChild(option);
     });
-
-    if (
-      currentValue &&
-      dropdown.querySelector(`option[value="${currentValue}"]`)
-    ) {
-      dropdown.value = currentValue;
-    }
   });
 }
 
